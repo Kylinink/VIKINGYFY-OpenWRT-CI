@@ -2,6 +2,71 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2026 VIKINGYFY
 
+# skb 回收
+function enable_skb_recycler() {
+  if [ -f "$1" ]; then
+    cat >> "$1" <<EOF
+
+CONFIG_KERNEL_SKB_RECYCLER=y
+CONFIG_KERNEL_SKB_RECYCLER_MULTI_CPU=y
+EOF
+  fi
+}
+
+########################################
+# 修改内核大小
+########################################
+
+function set_kernel_size() {
+
+  for file in target/linux/qualcommax/image/*.mk; do
+    sed -i 's/KERNEL_SIZE := [0-9]*k/KERNEL_SIZE := 12288k/g' "$file"
+  done
+
+}
+
+########################################
+# 生成最终 .config
+########################################
+
+function generate_config() {
+
+  config_file=".config"
+
+  cat "$GITHUB_WORKSPACE/Config/${WRT_CONFIG}.txt" \
+      "$GITHUB_WORKSPACE/Config/GENERAL.txt" > "$config_file"
+
+  local target=$(echo "$WRT_ARCH" | cut -d'_' -f2)
+
+  # 删除 WIFI
+  if [[ "$WRT_CONFIG" == *"NOWIFI"* ]]; then
+    remove_wifi "$target"
+  fi
+
+  # eBPF
+  cat_ebpf_config "$config_file"
+
+  # skb recycler
+  enable_skb_recycler "$config_file"
+
+  # 内核大小
+  set_kernel_size
+
+  # 写入 kernel config
+  cat_kernel_config "target/linux/qualcommax/${target}/config-default"
+
+}
+
+########################################
+# 执行生成 config
+########################################
+
+generate_config
+
+########################################
+# Luci / 系统修改
+########################################
+
 #移除luci-app-attendedsysupgrade
 sed -i "/attendedsysupgrade/d" $(find ./feeds/luci/collections/ -type f -name "Makefile")
 #修改默认主题
