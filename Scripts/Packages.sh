@@ -78,6 +78,12 @@ UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
 UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "gecoosac luci-app-timewol luci-app-wolplus"
 UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
 
+UPDATE_PACKAGE "luci-app-xray" "yichya/luci-app-xray" "master"
+UPDATE_PACKAGE "luci-i18n-xray-zh-cn" "xiechangan123/luci-i18n-xray-zh-cn" "main"
+UPDATE_PACKAGE "luci-app-lucky" "gdy666/luci-app-lucky" "main"
+UPDATE_PACKAGE "luci-app-podman" "Zerogiven-OpenWRT-Packages/luci-app-podman" "main"
+UPDATE_PACKAGE "open-app-filter" "destan19/OpenAppFilter" "master" "" "luci-app-appfilter oaf"
+
 #更新软件包版本
 UPDATE_VERSION() {
 	local PKG_NAME=$1

@@ -2,6 +2,65 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2026 VIKINGYFY
 
+# skb 回收
+function enable_skb_recycler() {
+  if [ -f "$1" ]; then
+    cat >> "$1" <<EOF
+
+CONFIG_KERNEL_SKB_RECYCLER=y
+CONFIG_KERNEL_SKB_RECYCLER_MULTI_CPU=y
+EOF
+  fi
+}
+
+########################################
+# 修改内核大小
+########################################
+
+function set_kernel_size() {
+
+  for file in target/linux/qualcommax/image/*.mk; do
+    sed -i 's/KERNEL_SIZE := [0-9]*k/KERNEL_SIZE := 12288k/g' "$file"
+  done
+
+}
+
+########################################
+# 生成最终 .config
+########################################
+
+function generate_config() {
+
+  config_file=".config"
+
+  cat "$GITHUB_WORKSPACE/Config/${WRT_CONFIG}.txt" \
+      "$GITHUB_WORKSPACE/Config/GENERAL.txt" > "$config_file"
+
+  local target=$(echo "$WRT_ARCH" | cut -d'_' -f2)
+
+  # 删除 WIFI
+  if [[ "$WRT_CONFIG" == *"NOWIFI"* ]]; then
+    remove_wifi "$target"
+  fi
+
+  # eBPF
+  cat_ebpf_config "$config_file"
+
+  # skb recycler
+  enable_skb_recycler "$config_file"
+
+  # 内核大小
+  set_kernel_size
+
+  # 写入 kernel config
+  cat_kernel_config "target/linux/qualcommax/${target}/config-default"
+
+}
+
+########################################
+# 执行生成 config
+########################################
+
 #移除luci-app-attendedsysupgrade
 sed -i "/attendedsysupgrade/d" $(find ./feeds/luci/collections/ -type f -name "Makefile")
 #修改默认主题
@@ -9,7 +68,7 @@ sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/coll
 #修改immortalwrt.lan关联IP
 sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $(find ./feeds/luci/modules/luci-mod-system/ -type f -name "flash.js")
 #添加编译日期标识
-sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ $WRT_MARK-$WRT_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
+#sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ $WRT_MARK-$WRT_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
 
 WIFI_SH=$(find ./target/linux/{mediatek/filogic,qualcommax}/base-files/etc/uci-defaults/ -type f -name "*set-wireless.sh" 2>/dev/null)
 WIFI_UC="./package/network/config/wifi-scripts/files/lib/wifi/mac80211.uc"
