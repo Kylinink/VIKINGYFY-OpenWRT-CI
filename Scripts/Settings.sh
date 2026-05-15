@@ -2,6 +2,96 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2026 VIKINGYFY
 
+# skb 回收
+function enable_skb_recycler() {
+  if [ -f "$1" ]; then
+    cat >> "$1" <<EOF
+
+CONFIG_KERNEL_SKB_RECYCLER=y
+CONFIG_KERNEL_SKB_RECYCLER_MULTI_CPU=y
+EOF
+  fi
+}
+
+########################################
+# 固定 kernel 6.18 新增 perf 选项
+########################################
+
+function pin_arm_perf_kernel_config() {
+  local target
+  target=$(grep -m 1 -oP '^CONFIG_TARGET_qualcommax_\K[[:alnum:]_]+(?=\=y)' "$GITHUB_WORKSPACE/Config/${WRT_CONFIG}.txt")
+
+  local kernel_config="target/linux/qualcommax/${target}/config-default"
+  if [ ! -f "$kernel_config" ]; then
+    echo "skip kernel perf config: $kernel_config not found"
+    return 0
+  fi
+
+  cat >> "$kernel_config" <<'EOF'
+
+# Kernel 6.18 eBPF/BTF perf dependencies
+# CONFIG_ARM64_BRBE is not set
+# CONFIG_ARM_CCI_PMU is not set
+# CONFIG_ARM_CCN is not set
+# CONFIG_ARM_CMN is not set
+# CONFIG_ARM_NI is not set
+# CONFIG_ARM_SMMU_V3_PMU is not set
+# CONFIG_ARM_DSU_PMU is not set
+# CONFIG_ARM_SPE_PMU is not set
+EOF
+}
+
+########################################
+# 修改内核大小
+########################################
+
+function set_kernel_size() {
+
+  for file in target/linux/qualcommax/image/*.mk; do
+    sed -i 's/KERNEL_SIZE := [0-9]*k/KERNEL_SIZE := 12288k/g' "$file"
+  done
+
+}
+
+########################################
+# 生成最终 .config
+########################################
+
+function generate_config() {
+
+  config_file=".config"
+
+  cat "$GITHUB_WORKSPACE/Config/${WRT_CONFIG}.txt" \
+      "$GITHUB_WORKSPACE/Config/GENERAL.txt" > "$config_file"
+
+  local target=$(echo "$WRT_ARCH" | cut -d'_' -f2)
+
+  # 删除 WIFI
+  if [[ "$WRT_CONFIG" == *"NOWIFI"* ]]; then
+    remove_wifi "$target"
+  fi
+
+  # skb recycler
+  enable_skb_recycler "$config_file"
+
+  # 内核大小
+  set_kernel_size
+
+  # kernel 6.18 perf config
+  pin_arm_perf_kernel_config
+
+}
+
+########################################
+# 执行生成 config
+########################################
+
+generate_config
+
+########################################
+# Luci / 系统修改
+########################################
+
 #移除luci-app-attendedsysupgrade
 sed -i "/attendedsysupgrade/d" $(find ./feeds/luci/collections/ -type f -name "Makefile")
 #修改默认主题
@@ -9,7 +99,7 @@ sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/coll
 #修改immortalwrt.lan关联IP
 sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $(find ./feeds/luci/modules/luci-mod-system/ -type f -name "flash.js")
 #添加编译日期标识
-sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ $WRT_MARK-$WRT_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
+sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ Kylin-$WRT_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
 
 WIFI_SH=$(find ./target/linux/{mediatek/filogic,qualcommax}/base-files/etc/uci-defaults/ -type f -name "*set-wireless.sh" 2>/dev/null)
 WIFI_UC="./package/network/config/wifi-scripts/files/lib/wifi/mac80211.uc"
@@ -63,6 +153,9 @@ if [[ "${WRT_TARGET^^}" == *"QUALCOMMAX"* ]]; then
 	#取消nss相关feed
 	echo "CONFIG_FEED_nss_packages=n" >> ./.config
 	echo "CONFIG_FEED_sqm_scripts_nss=n" >> ./.config
+	#开启sqm-nss插件
+	echo "CONFIG_PACKAGE_luci-app-sqm=y" >> ./.config
+	echo "CONFIG_PACKAGE_sqm-scripts-nss=y" >> ./.config
 	#设置NSS版本
 	echo "CONFIG_NSS_FIRMWARE_VERSION_12_5=y" >> ./.config
 	#其他调整
