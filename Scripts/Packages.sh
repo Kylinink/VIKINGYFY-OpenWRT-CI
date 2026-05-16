@@ -86,6 +86,7 @@ UPDATE_PACKAGE "luci-app-podman" "Zerogiven-OpenWRT-Packages/luci-app-podman" "m
 UPDATE_PACKAGE "open-app-filter" "destan19/OpenAppFilter" "master" "" "luci-app-appfilter oaf"
 UPDATE_PACKAGE "openwrt-bandix-plus" "timsaya/openwrt-bandix-plus" "main" "openwrt-bandix-plus"
 UPDATE_PACKAGE "luci-app-bandix-plus" "timsaya/luci-app-bandix-plus" "main" "luci-app-bandix-plus"
+UPDATE_PACKAGE "luci-app-lanspeed" "qimaoww/luci-app-lanspeed" "master" "lanspeed luci-app-lanspeed"
 
 #更新软件包版本
 UPDATE_VERSION() {
