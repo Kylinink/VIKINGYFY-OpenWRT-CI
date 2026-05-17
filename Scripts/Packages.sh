@@ -48,8 +48,8 @@ UPDATE_PACKAGE() {
 
 # UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名"
 UPDATE_PACKAGE "neobird" "thinktip/luci-theme-neobird" "main"
-UPDATE_PACKAGE "design" "https://github.com/gngpp/luci-theme-design" "js"
-UPDATE_PACKAGE "material3" "https://github.com/KawaiiHachimi/luci-theme-material3" "main"
+UPDATE_PACKAGE "luci-theme-design" "https://github.com/gngpp/luci-theme-design" "js"
+UPDATE_PACKAGE "luci-theme-material3" "https://github.com/KawaiiHachimi/luci-theme-material3" "main"
 #UPDATE_PACKAGE "argon" "sbwml/luci-theme-argon" "openwrt-25.12"
 UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
 UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
@@ -87,7 +87,7 @@ UPDATE_PACKAGE "luci-app-podman" "Zerogiven-OpenWRT-Packages/luci-app-podman" "m
 UPDATE_PACKAGE "open-app-filter" "destan19/OpenAppFilter" "master" "" "luci-app-appfilter oaf"
 UPDATE_PACKAGE "openwrt-bandix-plus" "timsaya/openwrt-bandix-plus" "main" "openwrt-bandix-plus"
 UPDATE_PACKAGE "luci-app-bandix-plus" "timsaya/luci-app-bandix-plus" "main" "luci-app-bandix-plus"
-UPDATE_PACKAGE "lanspeed" "qimaoww/luci-app-lanspeed" "master" "pkg"
+UPDATE_PACKAGE "lanspeed" "qimaoww/luci-app-lanspeed" "master"
 
 #更新软件包版本
 UPDATE_VERSION() {
