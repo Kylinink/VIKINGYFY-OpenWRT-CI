@@ -47,18 +47,19 @@ UPDATE_PACKAGE() {
 # UPDATE_PACKAGE "open-app-filter" "destan19/OpenAppFilter" "master" "" "luci-app-appfilter oaf" 这样会把原有的open-app-filter，luci-app-appfilter，oaf相关组件删除，不会出现coremark错误。
 
 # UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名"
-UPDATE_PACKAGE "argon" "sbwml/luci-theme-argon" "openwrt-25.12"
+UPDATE_PACKAGE "neobird" "thinktip/luci-theme-neobird" "main"
+UPDATE_PACKAGE "design" "https://github.com/gngpp/luci-theme-design" "js"
+UPDATE_PACKAGE "material3" "https://github.com/KawaiiHachimi/luci-theme-material3" "main"
+#UPDATE_PACKAGE "argon" "sbwml/luci-theme-argon" "openwrt-25.12"
 UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
 UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
-UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "master"
-UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
+#UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "master"
+#UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
 
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
-UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
-UPDATE_PACKAGE "nikki" "nikkinikki-org/OpenWrt-nikki" "main"
+#UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
+#UPDATE_PACKAGE "nikki" "nikkinikki-org/OpenWrt-nikki" "main"
 UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
-UPDATE_PACKAGE "passwall" "Openwrt-Passwall/openwrt-passwall" "main" "pkg"
-UPDATE_PACKAGE "passwall2" "Openwrt-Passwall/openwrt-passwall2" "main" "pkg"
 
 UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
 
@@ -69,7 +70,7 @@ UPDATE_PACKAGE "diskmanager" "4IceG/luci-app-mini-diskmanager" "main"
 UPDATE_PACKAGE "easytier" "EasyTier/luci-app-easytier" "main"
 UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5" "" "v2dat"
 UPDATE_PACKAGE "netspeedtest" "sirpdboy/netspeedtest" "main" "" "homebox ookla-speedtest"
-UPDATE_PACKAGE "netwizard" "sirpdboy/luci-app-netwizard" "main"
+#UPDATE_PACKAGE "netwizard" "sirpdboy/luci-app-netwizard" "main"
 UPDATE_PACKAGE "openlist2" "sbwml/luci-app-openlist2" "main"
 UPDATE_PACKAGE "partexp" "sirpdboy/luci-app-partexp" "main"
 UPDATE_PACKAGE "qbittorrent" "sbwml/luci-app-qbittorrent" "master" "" "qt6base qt6tools rblibtorrent"
@@ -80,13 +81,13 @@ UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "gecoosac luci-app-timewo
 UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
 
 UPDATE_PACKAGE "luci-app-vnt2" "whzhni1/luci-app-vnt2" "main"
-UPDATE_PACKAGE "helloworld" "fw876/helloworld" "dev" "luci-app-ssr-plus chinadns-ng dns2socks dns2tcp dnsproxy gn hysteria ipt2socks lua-neturl microsocks mihomo naiveproxy redsocks2 shadow-tls shadowsocks-libev shadowsocksr-libev simple-obfs tcping tuic-client v2ray-core v2ray-plugin v2raya xray-core xray-plugin" "chinadns-ng dns2tcp xray-core"
+UPDATE_PACKAGE "helloworld" "fw876/helloworld" "dev" "luci-app-ssr-plus chinadns-ng dns2socks dns2tcp dnsproxy gn hysteria ipt2socks lua-neturl microsocks mihomo naiveproxy redsocks2 shadow-tls shadowsocks-libev shadowsocksr-libev simple-obfs tcping tuic-client v2ray-core v2ray-plugin v2raya xray-core xray-plugin" "chinadns-ng dns2tcp mihomo simple-obfs "
 UPDATE_PACKAGE "luci-app-lucky" "gdy666/luci-app-lucky" "main"
 UPDATE_PACKAGE "luci-app-podman" "Zerogiven-OpenWRT-Packages/luci-app-podman" "main"
 UPDATE_PACKAGE "open-app-filter" "destan19/OpenAppFilter" "master" "" "luci-app-appfilter oaf"
 UPDATE_PACKAGE "openwrt-bandix-plus" "timsaya/openwrt-bandix-plus" "main" "openwrt-bandix-plus"
 UPDATE_PACKAGE "luci-app-bandix-plus" "timsaya/luci-app-bandix-plus" "main" "luci-app-bandix-plus"
-UPDATE_PACKAGE "luci-app-lanspeed" "qimaoww/luci-app-lanspeed" "master" "lanspeed luci-app-lanspeed"
+UPDATE_PACKAGE "lanspeed" "qimaoww/luci-app-lanspeed" "master" "pkg"
 
 #更新软件包版本
 UPDATE_VERSION() {
