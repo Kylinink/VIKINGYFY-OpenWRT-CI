@@ -53,6 +53,8 @@ UPDATE_PACKAGE "aurora" "eamonxg/luci-theme-aurora" "master"
 UPDATE_PACKAGE "aurora-config" "eamonxg/luci-app-aurora-config" "master"
 UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "master"
 UPDATE_PACKAGE "kucat-config" "sirpdboy/luci-app-kucat-config" "master"
+UPDATE_PACKAGE "design" "0x676e67/luci-theme-design" "js"
+UPDATE_PACKAGE "material3" "KawaiiHachimi/luci-theme-material3" "main"
 
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
@@ -79,6 +81,13 @@ UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
 UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
 UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "gecoosac luci-app-timewol luci-app-wolplus"
 UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
+
+UPDATE_PACKAGE "helloworld" "fw876/helloworld" "dev" "luci-app-ssr-plus chinadns-ng dns2socks dns2tcp dnsproxy gn hysteria ipt2socks lua-neturl microsocks mihomo naiveproxy redsocks2 shadow-tls shadowsocks-libev shadowsocksr-libev simple-obfs tcping tuic-client v2ray-core v2ray-plugin v2raya xray-core xray-plugin" "chinadns-ng dns2tcp simple-obfs xray-core"
+UPDATE_PACKAGE "luci-app-lucky" "gdy666/luci-app-lucky" "main"
+UPDATE_PACKAGE "luci-app-podman" "Zerogiven-OpenWRT-Packages/luci-app-podman" "main"
+UPDATE_PACKAGE "open-app-filter" "destan19/OpenAppFilter" "master" "" "luci-app-appfilter oaf"
+UPDATE_PACKAGE "openwrt-bandix-plus" "timsaya/openwrt-bandix-plus" "main" "openwrt-bandix-plus"
+UPDATE_PACKAGE "luci-app-bandix-plus" "timsaya/luci-app-bandix-plus" "main" "luci-app-bandix-plus"
 
 #更新软件包版本
 UPDATE_VERSION() {
