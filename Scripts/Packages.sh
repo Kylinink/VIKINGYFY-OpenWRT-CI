@@ -89,8 +89,7 @@ UPDATE_PACKAGE "open-app-filter" "destan19/OpenAppFilter" "master" "" "luci-app-
 UPDATE_PACKAGE "openwrt-bandix-plus" "timsaya/openwrt-bandix-plus" "main" "openwrt-bandix-plus"
 UPDATE_PACKAGE "luci-app-bandix-plus" "timsaya/luci-app-bandix-plus" "main" "luci-app-bandix-plus"
 UPDATE_PACKAGE "luci-app-airoha-npu" "bingoguo93/luci-app-airoha-npu" "main"
-UPDATE_PACKAGE "dae" "QiuSimons/luci-app-daed" "kix"
-UPDATE_PACKAGE "openwrt-clashoo" "kenzok8/openwrt-clashoo" "main"
+#UPDATE_PACKAGE "luci-app-daed" "QiuSimons/luci-app-daed" "kix"
 
 #更新软件包版本
 UPDATE_VERSION() {
