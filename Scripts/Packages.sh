@@ -90,7 +90,7 @@ UPDATE_PACKAGE "openwrt-bandix-plus" "timsaya/openwrt-bandix-plus" "main" "openw
 UPDATE_PACKAGE "luci-app-bandix-plus" "timsaya/luci-app-bandix-plus" "main" "luci-app-bandix-plus"
 UPDATE_PACKAGE "luci-app-airoha-npu" "bingoguo93/luci-app-airoha-npu" "main"
 UPDATE_PACKAGE "luci-app-easymesh" "kenzok8/openwrt-packagest" "master" "luci-app-easymesh" "luci-app-easymesh"
-UPDATE_PACKAGE "small-package" "kenzok8/small-package" "main" "daed-next luci-app-daed-next gost luci-app-gost luci-theme-tomato" "daed-next luci-app-daed-next gost luci-app-gost luci-theme-tomato"
+UPDATE_PACKAGE "small-package" "kenzok8/small-package" "main" "daed-next luci-app-daed-next gost luci-app-gost" "daed-next luci-app-daed-next gost luci-app-gost"
 
 #更新软件包版本
 UPDATE_VERSION() {
