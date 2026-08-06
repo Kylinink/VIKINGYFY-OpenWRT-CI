@@ -35,8 +35,8 @@ CONFIG_PACKAGE_luci-app-pbr=y
 #CONFIG_PACKAGE_luci-app-samba4=n
 CONFIG_PACKAGE_luci-app-upnp=y
 CONFIG_PACKAGE_luci-app-vsftpd=y
-#CONFIG_PACKAGE_luci-app-vnt=y
-#CONFIG_PACKAGE_luci-app-wolultra=n
+CONFIG_PACKAGE_luci-app-vnt=y
+CONFIG_PACKAGE_luci-app-wolultra=y
 #删除插件
 CONFIG_PACKAGE_luci-app-attendedsysupgrade=n
 CONFIG_PACKAGE_luci-app-wol=n
