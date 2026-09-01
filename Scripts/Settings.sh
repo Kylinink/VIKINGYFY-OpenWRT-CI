@@ -2,6 +2,99 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2026 VIKINGYFY
 
+# skb 回收
+function enable_skb_recycler() {
+  if [ -f "$1" ]; then
+    cat >> "$1" <<EOF
+
+CONFIG_KERNEL_SKB_RECYCLER=y
+CONFIG_KERNEL_SKB_RECYCLER_MULTI_CPU=y
+EOF
+  fi
+}
+
+########################################
+# 固定 kernel 6.18 新增 perf 选项
+########################################
+
+function pin_arm_perf_kernel_config() {
+  local target
+  target=$(grep -m 1 -oP '^CONFIG_TARGET_qualcommax_\K[[:alnum:]_]+(?=\=y)' "$GITHUB_WORKSPACE/Config/${WRT_CONFIG}.txt")
+
+  local kernel_config="target/linux/qualcommax/${target}/config-default"
+  if [ ! -f "$kernel_config" ]; then
+    echo "skip kernel perf config: $kernel_config not found"
+    return 0
+  fi
+
+  cat >> "$kernel_config" <<'EOF'
+
+# Kernel 6.18 eBPF/BTF perf dependencies
+# CONFIG_ARM64_BRBE is not set
+# CONFIG_ARM_CCI_PMU is not set
+# CONFIG_ARM_CCN is not set
+# CONFIG_ARM_CMN is not set
+# CONFIG_ARM_NI is not set
+# CONFIG_ARM_SMMU_V3_PMU is not set
+# CONFIG_ARM_DSU_PMU is not set
+# CONFIG_ARM_SPE_PMU is not set
+EOF
+}
+
+########################################
+# 修改内核大小
+########################################
+
+function set_kernel_size() {
+
+  for file in target/linux/qualcommax/image/*.mk; do
+    sed -i 's/KERNEL_SIZE := [0-9]*k/KERNEL_SIZE := 12288k/g' "$file"
+  done
+
+}
+
+########################################
+# 生成最终 .config
+########################################
+
+function generate_config() {
+
+  config_file=".config"
+
+  cat "$GITHUB_WORKSPACE/Config/${WRT_CONFIG}.txt" \
+      "$GITHUB_WORKSPACE/Config/GENERAL.txt" > "$config_file"
+
+  local target=$(echo "$WRT_ARCH" | cut -d'_' -f2)
+
+  # 删除 WIFI
+  if [[ "$WRT_CONFIG" == *"NOWIFI"* ]]; then
+    remove_wifi "$target"
+  fi
+
+  # skb recycler
+  enable_skb_recycler "$config_file"
+
+  # 内核大小
+  set_kernel_size
+
+  # kernel 6.18 perf config
+  pin_arm_perf_kernel_config
+
+}
+
+########################################
+# 执行生成 config
+########################################
+
+generate_config
+
+# 在 feeds.conf 中添加 lanspeed feed
+echo "src-git lanspeed https://github.com/qimaoww/luci-app-lanspeed.git" >> feeds.conf
+
+########################################
+# Luci / 系统修改
+########################################
+
 #移除luci-app-attendedsysupgrade
 sed -i "/attendedsysupgrade/d" $(find ./feeds/luci/collections/ -type f -name "Makefile")
 #修改默认主题
@@ -56,9 +149,133 @@ fi
 #高通平台调整
 DTS_PATH="./target/linux/qualcommax/dts/"
 if [[ "${WRT_TARGET^^}" == *"QUALCOMMAX"* ]]; then
+	echo "CONFIG_PACKAGE_luci-app-sqm=y" >> ./.config
+	echo "CONFIG_PACKAGE_sqm-scripts-nss=y" >> ./.config
 	#无WIFI配置调整Q6大小
 	if [[ "${WRT_CONFIG,,}" == *"wifi"* && "${WRT_CONFIG,,}" == *"no"* ]]; then
 		find $DTS_PATH -type f ! -iname '*nowifi*' -exec sed -i 's/ipq\(6018\|8074\).dtsi/ipq\1-nowifi.dtsi/g' {} +
 		echo "qualcommax set up nowifi successfully!"
 	fi
+fi
+
+#airoha平台调整：双 WAN 负载均衡 + IPv6 + board.json
+if [[ "${WRT_TARGET^^}" == *"AIROHA"* ]]; then
+    echo "=========================================="
+    echo "🔧 配置 Airoha 双 WAN 负载均衡（eth1+lan2→LAN, lan3→WAN2, lan4→WAN）"
+    echo "=========================================="
+    
+    mkdir -p ./package/base-files/files/etc/config/
+    mkdir -p ./package/base-files/files/etc/
+    
+    # 生成 network 配置（双 WAN + IPv6）
+    cat > ./package/base-files/files/etc/config/network << 'NETWORK_EOF'
+config interface 'loopback'
+    option device 'lo'
+    option proto 'static'
+    option ipaddr '127.0.0.1'
+    option netmask '255.0.0.0'
+
+config globals 'globals'
+    option ula_prefix 'auto'
+
+config device
+    option name 'br-lan'
+    option type 'bridge'
+    list ports 'eth1'
+    list ports 'lan2'
+
+config interface 'lan'
+    option device 'br-lan'
+    option proto 'static'
+    option ipaddr '192.168.1.1'
+    option netmask '255.255.255.0'
+    option ip6assign '60'
+
+config interface 'wan'
+    option device 'lan4'
+    option proto 'dhcp'
+    option metric '10'
+
+config interface 'wan6'
+    option device 'lan4'
+    option proto 'dhcpv6'
+    option reqaddress 'try'
+    option reqprefix 'auto'
+
+config interface 'wan2'
+    option device 'lan3'
+    option proto 'dhcp'
+    option metric '20'
+
+config interface 'wan2_6'
+    option device 'lan3'
+    option proto 'dhcpv6'
+    option reqaddress 'try'
+    option reqprefix 'auto'
+NETWORK_EOF
+    
+    sed -i "s/192\\.168\\.1\\.1/$WRT_IP/g" ./package/base-files/files/etc/config/network
+    
+    # 生成 board.json（修复 LED 和 Web 界面显示）
+    cat > ./package/base-files/files/etc/board.json << 'BOARDJSON_EOF'
+{
+	"model": {
+		"id": "nokia,xg-040g-md",
+		"name": "Nokia Bell XG-040G-MD"
+	},
+	"led": {
+		"eth1": {
+			"name": "eth1 (2.5G)",
+			"sysfs": "mt7530-0:0f:green:lan-1",
+			"type": "netdev",
+			"device": "eth1",
+			"mode": "link tx rx"
+		},
+		"lan2": {
+			"name": "lan2",
+			"sysfs": "mt7530-0:0a:green:lan-2",
+			"type": "netdev",
+			"device": "lan2",
+			"mode": "link tx rx"
+		},
+		"lan3": {
+			"name": "lan3",
+			"sysfs": "mt7530-0:0b:green:lan-3",
+			"type": "netdev",
+			"device": "lan3",
+			"mode": "link tx rx"
+		},
+		"lan4": {
+			"name": "lan4",
+			"sysfs": "mt7530-0:0c:green:lan-4",
+			"type": "netdev",
+			"device": "lan4",
+			"mode": "link tx rx"
+		}
+	},
+	"network": {
+		"lan": {
+			"ports": [
+				"eth1",
+				"lan2"
+			],
+			"protocol": "static"
+		},
+		"wan": {
+			"device": "lan4",
+			"protocol": "dhcp"
+		},
+		"wan2": {
+			"device": "lan3",
+			"protocol": "dhcp"
+		}
+	}
+}
+BOARDJSON_EOF
+    
+    echo "✅ Airoha 双 WAN 网络配置完成"
+    echo "   - LAN: eth1 (2.5G) + lan2"
+    echo "   - WAN: lan4 (metric 10, IPv4+IPv6)"
+    echo "   - WAN2: lan3 (metric 20, IPv4+IPv6)"
+    echo "   - LED: eth1/lan2/lan3/lan4 已绑定"
 fi
